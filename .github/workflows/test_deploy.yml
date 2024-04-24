@@ -40,5 +40,5 @@ jobs:
         ssh ${{secrets.DEPLOY_USER}}@${{secrets.DEPLOY_TEST_HOST}} "sudo rm -rf test && sudo mkdir -p test"
         sudo tar --exclude=".git*" --exclude="id_rsa" --exclude="*.yml" -cf - . | ssh ${{secrets.DEPLOY_USER}}@${{secrets.DEPLOY_TEST_HOST}} "sudo tar -C test -xf -"
         ssh ${{secrets.DEPLOY_USER}}@${{secrets.DEPLOY_TEST_HOST}} "docker build --rm -t test-image test/"
-        ssh ${{secrets.DEPLOY_USER}}@${{secrets.DEPLOY_TEST_HOST}} "docker service update --image test-image:latest --force test-service"
-        ssh ${{secrets.DEPLOY_USER}}@${{secrets.DEPLOY_TEST_HOST}} "docker system prune -f"
+
+        
