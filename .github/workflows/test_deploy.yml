@@ -1,0 +1,44 @@
+name: Test Deployment
+
+on:
+  push:
+    branches:
+    - pipeline
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    # - name: Set up Node.js
+    #   uses: actions/setup-node@v2
+    #   with:
+    #     node-version: '18.17'
+    
+    - name: Setting Environment Variables
+      run: |
+        ############### SETTING ENV FILE STARTS ######################################################
+        FILE_NAME=".env"
+        echo "DB_USERNAME=${{secrets.DB_USERNAME}}" > $FILE_NAME
+        echo "MAIL_FROM_ADDRESS=${{vars.MAIL_FROM_ADDRESS}}" >> $FILE_NAME
+        ############### SETTING ENV FILE END ######################################################
+
+    - name: SSH Connection
+      run: |
+        mkdir -p ~/.ssh
+        echo "$PRIVATE_KEY_CONTENT" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{secrets.DEPLOY_USER}}@${{secrets.DEPLOY_TEST_HOST}} echo "Connection established"
+      env:
+        PRIVATE_KEY_CONTENT: ${{secrets.DEPLOY_KEY}}
+      
+    - name: Coping Files to Server
+      run: |
+        ssh ${{secrets.DEPLOY_USER}}@${{secrets.DEPLOY_TEST_HOST}} "sudo rm -rf test && sudo mkdir -p test"
+        sudo tar --exclude=".git*" --exclude="id_rsa" --exclude="*.yml" -cf - . | ssh ${{secrets.DEPLOY_USER}}@${{secrets.DEPLOY_TEST_HOST}} "sudo tar -C test -xf -"
+        ssh ${{secrets.DEPLOY_USER}}@${{secrets.DEPLOY_TEST_HOST}} "docker build --rm -t test-image test/"
+        ssh ${{secrets.DEPLOY_USER}}@${{secrets.DEPLOY_TEST_HOST}} "docker service update --image test-image:latest --force test-service"
+        ssh ${{secrets.DEPLOY_USER}}@${{secrets.DEPLOY_TEST_HOST}} "docker system prune -f"

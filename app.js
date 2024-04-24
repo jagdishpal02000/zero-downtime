@@ -1,14 +1,8 @@
 const express = require("express");
-
-
 const app = express();
-
-
-// require('./cron');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 
 
 
@@ -26,6 +20,4 @@ app.get("/health", (req, res) => {
   res.json({ message: "server is working with zero downtime" });
 });
 
-
-
-module.exports = server;
+module.exports = app;
