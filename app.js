@@ -13,11 +13,11 @@ app.use(express.urlencoded({ extended: true }));
  */
 
 app.get("/", (req, res) => {
-  res.send("Welcome to APIs with docker");
+  res.send("Welcome to APIs with docker 1");
 });
 
 app.get("/health", (req, res) => {
-  res.json({ message: "server is working with zero downtime" });
+  res.json({ message: "server is working with zero downtime test 1" });
 });
 
 module.exports = app;
